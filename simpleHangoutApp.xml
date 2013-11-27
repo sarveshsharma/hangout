@@ -58,7 +58,7 @@
 function showParticipants() {
   var participants = gapi.hangout.getParticipants();
 
-  var retVal = '<p>Participants: </p><ul>';
+  var retVal = '<p>Maddy is looking for list of Participants: </p><ul>';
 
   for (var index in participants) {
     var participant = participants[index];
