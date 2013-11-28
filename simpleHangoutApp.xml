@@ -52,7 +52,7 @@
 
 <hr>
 
-<p><a href="http://developers.google.com/+/hangouts/getting-started">Read the docs</a> <b>to learn more about developing hangouts!</b></a></p>
+<p><a href="http://developers.google.com/+/hangouts/getting-started">Read the docs</a> <i>to learn more about developing hangouts!</i></a></p>
 
 <script>
 function showParticipants() {
