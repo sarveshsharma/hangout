@@ -19,78 +19,204 @@
 	</ModulePrefs>
 	<Content type="html"><![CDATA[     
 
-<html>
-<style type="text/css">
 <!--
-.button {
-  border-radius: 3px;
-  -moz-border-radius: 3px;
-  background: -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ddd));
-  background: -moz-linear-gradient(top, #fff, #ddd);  
-  border: 1px solid #bbb;
-}
+  Copyright (c) 2011 Google Inc.
 
-.button:active {
-	background: -webkit-gradient(linear, left top, left bottom, from(#aaa), to(#333)); 
-	background: -moz-linear-gradient(bottom, #ddd, #aaa); }
+  Licensed under the Apache License, Version 2.0 (the "License"); you may not
+  use this file except in compliance with the License. You may obtain a copy of
+  the License at
 
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+  License for the specific language governing permissions and limitations under
+  the License.
+
+  To run this sample, replace YOUR API KEY with your application's API key.
+  It can be found at https://code.google.com/apis/console/?api=plus under API Access.
+  Activate the Google+ service at https://code.google.com/apis/console/ under Services
 -->
-</style>
-<body>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <script src="//hangoutsapi.talkgadget.google.com/talkgadget/app/gadgets/js/rpc.js"></script>
+    <script src="//hangoutsapi.talkgadget.google.com/hangouts/api/hangout.js"></script>
+    <style>
+                .left{
+                        float:left;
+                }
+                .contact{
+                        
+                }
+                div{
+                        padding:5px;
+                }
+                img{
+                        border:1px solid black;
+                }
+                h2{
+                        font-family:Arial;
+                        font-size:15px;
+                        -webkit-margin-after: 1px;
+                        -webkit-margin-before: 1px;
+                }
+                #contacts{
+                        width:95%;
+                        height:800px;
+                        overflow-y:scroll;
+                        overflow-y:hidden;
+                }
+                
+                .contactWrapper{
+                        width:100%;
+                        border:1px dotted grey;
+                        float:left;
+                        margin-bottom:5px;
+                        background-color:#eee;
+                }
+                
+                
+        </style>
+  </head>
+  <body>
+    <!--Add a button for the user to click to initiate auth sequence -->
+    <button id="authorize-button" style="visibility: hidden">Authorize</button>
+    <script type="text/javascript">
+      // Enter a client ID for a web application from the Google Developer Console.
+      // The provided clientId will only work if the sample is run directly from
+      // https://google-api-javascript-client.googlecode.com/hg/samples/authSample.html
+      // In your Developer Console project, add a JavaScript origin that corresponds to the domain
+      // where you will be running the script.
+      var clientId = '677666703773-3vgdpi5ephjojmc6v2i53da0uvl8787d.apps.googleusercontent.com';
 
-<script src="//plus.google.com/hangouts/_/api/v1/hangout.js"></script>
+      // Enter the API key from the Google Develoepr Console - to handle any unauthenticated
+      // requests in the code.
+      // The provided key works for this sample only when run from
+      // https://google-api-javascript-client.googlecode.com/hg/samples/authSample.html
+      // To use in your own application, replace this API key with your own.
+      var apiKey = 'AIzaSyBSVhOUoIgZ4BtWjwozhyT_CCO_paJKKpo';
 
-<h3>Simple Hangout App</h3>
+      // To enter one or more authentication scopes, refer to the documentation for the API.
+      //var scopes = 'https://www.google.com/m8/feeds';
+      var scopes='https://www.googleapis.com/auth/plus.login';
 
-<p>
-<input class="button" type="button" value="Show participants!" id="showParticipants" 
-    style="visibility:hidden;"
-    onClick="showParticipants()"/>
-</p>
+      // Use a button to handle authentication the first time.
+      function handleClientLoad() {
+        gapi.client.setApiKey(apiKey);
+        window.setTimeout(checkAuth,1);
+      }
 
-<div id="participantsDiv"></div>
+      function checkAuth() {
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+      }
 
-<hr>
 
-<p><a href="http://developers.google.com/+/hangouts/getting-started">Read the docs</a> <i>to learn more about developing hangouts!</i></a></p>
-
-<script>
-function showParticipants() {
-  var participants = gapi.hangout.getParticipants();
-
-  var retVal = '<p>Maddy is looking for list of Participants: </p><ul>';
-
-  for (var index in participants) {
-    var participant = participants[index];
-
-    if (!participant.person) {
-      retVal += '<li>A participant not running this app</li>';
-    }
-    retVal += '<li>' + participant.person.displayName + '</li>';
-  }
-
-  retVal += '</ul>';
-
-  var div = document.getElementById('participantsDiv');
-
-  div.innerHTML = retVal;
-}
-
-function init() {
-  // When API is ready...                                                         
-  gapi.hangout.onApiReady.add(
-      function(eventObj) {
-        if (eventObj.isApiReady) {
-          document.getElementById('showParticipants')
-            .style.visibility = 'visible';
+      function handleAuthResult(authResult) {
+        
+        var authorizeButton = document.getElementById('authorize-button');
+        if (authResult && !authResult.error) {
+          authorizeButton.style.visibility = 'hidden';
+          makeApiCall();
+        } else {
+          authorizeButton.style.visibility = '';
+          authorizeButton.onclick = handleAuthClick;
         }
-      });
-}
+      }
 
-// Wait for gadget to load.                                                       
-gadgets.util.registerOnLoadHandler(init);
-</script>
-</body>
+      function handleAuthClick(event) {
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+        return false;
+      }
+
+      // Load the API and make an API call.  Display the results on the screen.
+      function makeApiCall() {
+       /* var token=gapi.auth.getToken();
+          $.ajax({
+            //url: 'https://www.google.com/m8/feeds/contacts/default/full?alt=json',
+            //url:'https://www.googleapis.com/plus/v1/people/me/people/visible?key='+apiKey+'&alt=json',
+            url:'https://www.googleapis.com/plus/v1/people/me/people/visible?key='+apiKey,
+            dataType: 'jsonp',
+            type: "GET",
+            data: token,
+            success: function (data) {
+                console.log(JSON.stringify(data))
+                alert("success: " + JSON.stringify(data))
+                
+            },
+            error: function (data) {
+                console.log(JSON.stringify(data))
+                console.log("error: " + JSON.stringify(data))
+            }
+        })*/
+        gapi.client.load('plus','v1', function(){
+          var request = gapi.client.plus.people.list({
+            'userId' : 'me',
+            'collection' : 'visible'
+          });
+          
+          request.execute(function(resp) {
+            var contactsAry=resp.items;
+            var contactsDiv=document.getElementById("contacts");
+	        for(i=0;i<contactsAry.length;i++){
+	                var contactWrapperDiv=document.createElement('div');
+	                contactWrapperDiv.setAttribute('class','contactWrapper');
+	                
+	                var contactDiv=document.createElement('div');
+	                contactDiv.setAttribute('class','contact left');
+	                
+	                var imgDiv=document.createElement('div');
+	                imgDiv.setAttribute('class','left');
+	                
+	                var contactImg=document.createElement('img');
+	                contactImg.setAttribute('src',contactsAry[i].image.url);
+	                
+	                imgDiv.appendChild(contactImg);
+	                
+	                var contactDetailDiv=document.createElement('div');
+	                contactDetailDiv.setAttribute('class','left');
+	                
+	                var contactName=document.createElement('h2');
+	                
+	                var textNode=document.createTextNode(contactsAry[i].displayName);
+	                contactName.appendChild(textNode);
+	                contactDetailDiv.appendChild(contactName);
+	                
+	                var contactProfileLinkDiv=document.createElement('div');
+	                var contactHangoutLinkDiv=document.createElement('div');
+	                
+	                contactProfileLinkDiv.setAttribute('class','left');
+	                contactHangoutLinkDiv.setAttribute('class','left');
+	                
+	                var contactProfileLink=document.createElement('a');
+	                var contactHangoutLink=document.createElement('a');
+	                contactProfileLink.setAttribute('href',contactsAry[i].url);
+	                contactProfileLink.appendChild(document.createTextNode("Profile"));
+	                contactProfileLinkDiv.appendChild(contactProfileLink);
+	                contactHangoutLinkDiv.appendChild(contactHangoutLink);
+	                
+	                contactDiv.appendChild(imgDiv);
+	                contactDiv.appendChild(contactDetailDiv);
+	                
+	                contactDiv.appendChild(contactProfileLinkDiv);
+	                contactDiv.appendChild(contactHangoutLinkDiv);
+	                
+	                contactWrapperDiv.appendChild(contactDiv);
+	                contactsDiv.appendChild(contactWrapperDiv);
+	        }
+            console.log(JSON.stringify(resp))
+          });
+        });
+      }
+    </script>
+    <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
+    <!--<script type="text/javascript" src="//code.jquery.com/jquery-1.10.2.min.js"></script>-->
+    <div id="content"></div>
+    <div id="contacts"></div>
+  </body>
+</html>
 ]]>
 </Content>
 </Module>
